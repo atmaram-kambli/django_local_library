@@ -59,6 +59,11 @@ class Book(models.Model):
         """Returns the URL to access a detail record for this book."""
         return reverse('book-detail', args=[str(self.id)])
     
+    def display_genre(self):
+        """Create a string for the Genre. This is required to display genre in Admin."""
+        return ', '.join(genre.name for genre in self.genre.all()[:3])
+
+    display_genre.short_description = 'Genre'
 
 
 # 3. BookInstance Model
@@ -114,3 +119,28 @@ class Author(models.Model):
     def __str__(self):
         """String for representing the Model object."""
         return f'{self.last_name}, {self.first_name}'
+
+
+class Language(models.Model):
+    """Model representing the natural language of the books"""
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        help_text="Enter the book's natural language (e.g. English, German, etc.)"
+    )
+
+    def __str__(self):
+        return self.name;
+
+    def get_absolute_url(self):
+        """Returns the url to access a particular genre instance."""
+        return reverse('language-detail', args=[str(self.id)])
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower('name'),
+                name='language_name_case_insensitive_unique',
+                violation_error_message = "Language already exists (case insensitive match)"
+            ),
+        ]
